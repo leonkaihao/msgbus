@@ -1,0 +1,10 @@
+{
+    "device_id": "dev$9527",
+    "consumers": [{
+        "endpoint": "nats://nats:4222",
+        "topics":[
+            {"topic": ">", "group": "group1"}
+        ],
+        "show": "all"
+    }]
+}
