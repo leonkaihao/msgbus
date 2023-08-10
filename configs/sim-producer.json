@@ -1,0 +1,12 @@
+{
+    "device_id": "dev$9527",
+    "producer": {
+        "endpoint": "nats://nats:4222",
+        "events": [
+            {"topic":"topic0", "mode": "fire", "data":{"timestamp":"2022-01-07T12:37:16.041285614Z","orgId":"org$1001","ver":1,"eventType":"GEOSPATIALEVENT_ZONE_ARRIVAL","details":{"zoneId":"zo$1003","deviceId":"de$1009","info":{"locale_id":"lo$1001"}},"geoTag":"c7c37v1h60p3605vp4s0"}},
+            {"topic": "topic2", "mode": "fire", "sleep":1000, "data":{"timestamp":"2022-01-07T12:37:16.929019281Z","orgId":"org$1001","ver":1,"eventType":"GEOSPATIALEVENT_ZONE_DEPARTURE","details":{"zoneId":"zo$1003","deviceId":"de$1009","info":{"locale_id":"lo$1001"}},"geoTag":"c7c37v1h60p3605vp4s0"}},
+            {"topic": "topic1", "mode": "fire", "data":{"timestamp":"2022-01-04T02:39:04.439390968Z","orgId":"org$1001","ver":1,"eventType":"GEOSPATIALEVENT_BEACON_ASSIST_DETECT","details":{"beaconId":"be$1002","deviceId":"de$1003"},"geoTag":"dedf90912jijfejdij"}},
+            {"topic": "reading.absloc", "mode": "request", "sleep":3000, "repeat": 99999999, "data":{"absoluteLocation":{"readingTimestamp":"2022-01-04T02:39:04.439390968Z","orgId":"org$1001","ver":1,"tid":"t$1", "x":1.1, "y":1.1,"z":1.1,"geoTag":{"tagId":"dedf90912jijfejdij"},"localeId":"loc$1"}}, "metadata": {"name": "reading", "msg_type": "absloc", "oid": "org$1001", "did": "de$1009"}}
+        ]
+    }
+}

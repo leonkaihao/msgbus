@@ -1,0 +1,7 @@
+{
+  "consumers": [
+    {
+      "endpoint": "nats://localhost:4222"
+    }
+  ]
+}

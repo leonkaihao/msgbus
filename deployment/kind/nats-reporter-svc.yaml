@@ -1,0 +1,17 @@
+# kubectl expose deployment nats-reporter --name=nats-reporter --dry-run=client -oyaml>nats-reporter-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: mst
+  labels:
+    app: nats-reporter
+  name: nats-reporter
+spec:
+  ports:
+  - port: 7777
+    protocol: TCP
+    targetPort: 7777
+  selector:
+    app: nats-reporter
+status:
+  loadBalancer: {}

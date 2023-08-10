@@ -1,0 +1,26 @@
+# kubectl expose deployment nats --name=nats --dry-run=client -oyaml>nats-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: mst
+  labels:
+    app: nats
+  name: nats
+spec:
+  ports:
+  - name: port-1
+    port: 4222
+    protocol: TCP
+    targetPort: 4222
+  - name: port-2
+    port: 6222
+    protocol: TCP
+    targetPort: 6222
+  - name: port-3
+    port: 8222
+    protocol: TCP
+    targetPort: 8222
+  selector:
+    app: nats
+status:
+  loadBalancer: {}

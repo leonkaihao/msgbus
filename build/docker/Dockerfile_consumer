@@ -1,0 +1,11 @@
+FROM golang:1.18-alpine AS GO_BUILD
+WORKDIR /build
+COPY . .
+RUN go build -o consumer ./app/consumer/...
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=GO_BUILD /build/configs/ ./configs/
+COPY --from=GO_BUILD /build/consumer ./
+
+CMD [ "./consumer", "./configs/sim-consumer.json" ] 

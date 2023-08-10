@@ -1,0 +1,17 @@
+# kubectl expose deployment prometheus --name=prometheus --dry-run=client -oyaml>prometheus-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: mst
+  labels:
+    app: prometheus
+  name: prometheus
+spec:
+  ports:
+  - port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: prometheus
+status:
+  loadBalancer: {}

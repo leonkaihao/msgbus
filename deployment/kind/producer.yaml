@@ -1,0 +1,24 @@
+# kubectl create deployment producer --image=sim/nats/producer:1.0 --replicas=1   --dry-run=client -oyaml>producer.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mst
+  labels:
+    app: producer
+  name: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - image: sim/nats/producer:1.0
+        name: producer
+        resources: {}
+status: {}

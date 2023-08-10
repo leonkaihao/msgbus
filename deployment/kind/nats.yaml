@@ -1,0 +1,32 @@
+# kubectl create deployment nats --port 4222 --image nats --dry-run=client -oyaml>nats.yaml
+# kubectl edit deployments.apps nats # add port 6222, 8222 to the yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mst
+  labels:
+    app: nats
+  name: nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nats
+    spec:
+      containers:
+      - image: nats
+        name: nats
+        ports:
+        - containerPort: 4222
+          protocol: TCP
+        - containerPort: 6222
+          protocol: TCP
+        - containerPort: 8222
+          protocol: TCP
+        resources: {}
+status: {}

@@ -1,0 +1,26 @@
+# kubectl create deployment prometheus --port 9090 --image=nats/prometheus:1.0 --dry-run=client -oyaml>prometheus.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mst
+  labels:
+    app: prometheus
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - image: nats/prometheus:1.0
+        name: prometheus
+        ports:
+        - containerPort: 9090
+        resources: {}
+status: {}

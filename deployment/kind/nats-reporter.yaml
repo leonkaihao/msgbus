@@ -1,0 +1,27 @@
+# kubectl create deployment nats-reporter --port 7777 --image=natsio/prometheus-nats-exporter --dry-run=client -oyaml>nats-reporter.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mst
+  labels:
+    app: nats-reporter
+  name: nats-reporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats-reporter
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nats-reporter
+    spec:
+      containers:
+      - image: natsio/prometheus-nats-exporter
+        name: prometheus-nats-exporter
+        ports:
+        - containerPort: 7777
+        resources: {}
+        args: ["-varz", "http://nats:8222"]
+status: {}

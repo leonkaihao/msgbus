@@ -1,0 +1,25 @@
+
+# kubectl create deployment consumer --image=sim/nats/consumer:1.0 --replicas=1  --dry-run=client -oyaml>consumer.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: mst
+  labels:
+    app: consumer
+  name: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - image: sim/nats/consumer:1.0
+        name: consumer
+        resources: {}
+status: {}
