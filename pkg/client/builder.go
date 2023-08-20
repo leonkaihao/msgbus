@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 
+	"github.com/leonkaihao/msgbus/pkg/client/inproc"
 	"github.com/leonkaihao/msgbus/pkg/client/nats"
 	"github.com/leonkaihao/msgbus/pkg/model"
 )
@@ -29,6 +30,8 @@ func (b *builder) Build() (model.Client, error) {
 	switch b.clientName {
 	case CLI_NATS:
 		return nats.NewClient(), nil
+	case CLI_INPROC:
+		return inproc.NewClient(), nil
 	default:
 		return nil, errors.New("No client named " + b.clientName)
 	}
