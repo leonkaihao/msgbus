@@ -9,8 +9,8 @@ type Consumer interface {
 	ID() string
 	// Name is assigned by user for categorizing
 	Name() string
-	// Topic return the topic string, used by Subscribe
-	Topic() string
+	// Sub return the subscribe string
+	Sub() string
 	// Group return the conusmer group string, used by Subscribe
 	Group() string
 	// Subscribe the topic within the consumer group

@@ -1,40 +1,26 @@
 package nats
 
 import (
+	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
 	log "github.com/sirupsen/logrus"
 )
 
 type client struct {
-	dict map[string]model.Broker
+	*common.ClientBase
 }
 
 func NewClient() model.Client {
 	log.Infoln("[NATS] client created.")
-	cli := new(client)
-	cli.dict = make(map[string]model.Broker)
+	cli := &client{
+		common.NewClientBase(),
+	}
 	return cli
 }
 
 func (cli *client) Broker(url string) model.Broker {
-	brk, ok := cli.dict[url]
-
-	if !ok {
-		brk = NewBroker(cli, url)
-		cli.dict[url] = brk
+	if cli.ClientBase.Broker(url) == nil {
+		cli.ClientBase.WithBroker(url, NewBroker(cli, url))
 	}
-	return brk
-}
-
-func (cli *client) Remove(brk model.Broker) error {
-	delete(cli.dict, brk.URL())
-	return nil
-}
-
-func (cli *client) Close() error {
-	for _, v := range cli.dict {
-		v.Close()
-	}
-	log.Infoln("[NATS] client closed.")
-	return nil
+	return cli.ClientBase.Broker(url)
 }

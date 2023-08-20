@@ -4,7 +4,7 @@ type Broker interface {
 	// URL endpoint to message broker
 	URL() string
 	// Consumer generate a consumer from this broker
-	Consumer(name string, topic string, group string) Consumer
+	Consumer(name string, sub string, group string) Consumer
 	// Producer generate a consumer from this broker
 	Producer(name string, topic string) Producer
 	// release the resource of its own

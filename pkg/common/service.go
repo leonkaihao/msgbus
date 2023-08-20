@@ -50,11 +50,11 @@ func (svc *service) AddConsumers(cms []model.Consumer) {
 				select {
 				case msgr, ok := <-chMsg:
 					if !ok {
-						svc.cb.OnError(cm, fmt.Errorf("failed to receive a message from channel %v:%v", cm.Topic(), cm.Group()))
+						svc.cb.OnError(cm, fmt.Errorf("failed to receive a message from channel %v:%v", cm.Sub(), cm.Group()))
 						svc.removeConsumer(cm)
 						return
 					}
-					log.Debugf("msgbus service: consumer %v received a message %v", cm.ID(), cm.Topic())
+					log.Debugf("msgbus service: consumer %v received a message %v", cm.ID(), cm.Sub())
 					svc.msgChan <- msgr.WithDest(cm.ID())
 				case <-svc.exitChan:
 					svc.removeConsumer(cm)

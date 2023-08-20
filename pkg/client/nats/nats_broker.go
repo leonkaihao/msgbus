@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
 
 	nats "github.com/nats-io/nats.go"
@@ -8,20 +9,14 @@ import (
 )
 
 type broker struct {
-	cli       model.Client
-	url       string
-	conn      *nats.Conn
-	consumers map[string]model.Consumer
-	producers map[string]model.Producer
+	*common.BrokerBase
+	conn *nats.Conn
 }
 
 func NewBroker(cli model.Client, url string) model.Broker {
 	log.Infof("[NATS] broker for %v created", url)
 	brk := new(broker)
-	brk.cli = cli
-	brk.url = url
-	brk.consumers = make(map[string]model.Consumer)
-	brk.producers = make(map[string]model.Producer)
+	brk.BrokerBase = common.NewBrokerBase(cli, url)
 	var err error
 	// DefaultURL                = "nats://127.0.0.1:4222"
 	// DefaultPort               = 4222
@@ -44,77 +39,31 @@ func NewBroker(cli model.Client, url string) model.Broker {
 	return brk
 }
 
-func (brk *broker) URL() string {
-	return brk.url
-}
-
-func (brk *broker) Consumer(name string, topic string, group string) model.Consumer {
-	consumerKey := brk.makeConsumerKey(name, topic, group)
-	if csmr, ok := brk.consumers[consumerKey]; ok {
+func (brk *broker) Consumer(name string, sub string, group string) model.Consumer {
+	csmr := brk.BrokerBase.GetConsumer(name, sub, group)
+	if csmr != nil {
 		return csmr
 	}
-	csmr := NewConsumer(name, brk, topic, group)
-	brk.consumers[consumerKey] = csmr
+	csmr = NewConsumer(name, brk, sub, group)
+	brk.BrokerBase.SetConsumer(csmr)
 	return csmr
 }
 
 func (brk *broker) Producer(name string, topic string) model.Producer {
-	producerKey := brk.makeProducerKey(name, topic)
-	if prod, ok := brk.producers[producerKey]; ok {
+	prod := brk.BrokerBase.GetProducer(name, topic)
+	if prod != nil {
 		return prod
 	}
 
-	prod := NewProducer(name, brk, topic)
-	brk.producers[producerKey] = prod
+	prod = NewProducer(name, brk, topic)
+	brk.BrokerBase.SetProducer(prod)
 	return prod
 }
 
 func (brk *broker) Close() error {
-	brk.closeAllConsumer()
-	brk.closeAllProducer()
+	brk.BrokerBase.Close()
 	brk.conn.Close()
-	log.Infof("[NATS] broker %v closed.", brk.url)
 	return nil
-}
-
-func (brk *broker) makeConsumerKey(name string, group string, topic string) string {
-	return name + ":" + topic + ":" + group
-}
-
-func (brk *broker) makeProducerKey(name string, topic string) string {
-	return name + ":" + topic
-}
-
-func (brk *broker) RemoveConsumer(csmr model.Consumer) error {
-	if csmr == nil {
-		return nil
-	}
-	csmr.Close()
-	delete(brk.consumers, brk.makeConsumerKey(csmr.Name(), csmr.Topic(), csmr.Group()))
-	return nil
-}
-
-func (brk *broker) RemoveProducer(prd model.Producer) error {
-	if prd == nil {
-		return nil
-	}
-	prd.Close()
-	delete(brk.producers, brk.makeProducerKey(prd.Name(), prd.Topic()))
-	return nil
-}
-
-func (brk *broker) closeAllConsumer() {
-	for _, v := range brk.consumers {
-		v.Close()
-	}
-	brk.consumers = map[string]model.Consumer{}
-}
-
-func (brk *broker) closeAllProducer() {
-	for _, v := range brk.producers {
-		v.Close()
-	}
-	brk.producers = map[string]model.Producer{}
 }
 
 func natsErrHandler(nc *nats.Conn, sub *nats.Subscription, natsErr error) {
