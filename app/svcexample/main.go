@@ -53,7 +53,7 @@ func main() {
 		return
 	}
 
-	cli, err := client.NewBuilder(client.CLI_NATS).Build()
+	cli, err := client.NewBuilder(client.CLI_INPROC).Build()
 	if err != nil {
 		log.Fatal(err)
 	}
