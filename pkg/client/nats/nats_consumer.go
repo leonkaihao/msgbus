@@ -1,10 +1,6 @@
 package nats
 
 import (
-	"fmt"
-	"math/rand"
-	"sync"
-
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
 
@@ -13,40 +9,26 @@ import (
 )
 
 type consumer struct {
-	id         string
-	name       string
+	*common.ConsumerBase
 	brk        *broker
-	topic      string
-	group      string
 	msgCount   int64
 	chIn       chan *nats.Msg
 	chOut      chan model.Messager
 	chClose    chan int
-	wg         sync.WaitGroup
 	subscribed bool
 }
 
-func NewConsumer(name string, brk *broker, topic string, group string) model.Consumer {
+func NewConsumer(name string, brk *broker, sub string, group string) model.Consumer {
 	if brk == nil {
 		log.Fatalln("[NATS] broker cannot be Nil.")
 	}
+	cBase := common.NewConsumerBase(name, sub, group)
 	csmr := &consumer{
-		id:    fmt.Sprintf("%v-%v", name, rand.Intn(1000)),
-		name:  name,
-		brk:   brk,
-		topic: topic,
-		group: group,
+		ConsumerBase: cBase,
+		brk:          brk,
 	}
-	log.Infof("[NATS] consumer(%v) topic group (%v:%v) created.", csmr.ID(), topic, group)
+	log.Infof("[NATS] consumer(%v) topic group (%v:%v) created.", csmr.ID(), sub, group)
 	return csmr
-}
-
-func (csmr *consumer) ID() string {
-	return csmr.id
-}
-
-func (csmr *consumer) Name() string {
-	return csmr.name
 }
 
 func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
@@ -55,12 +37,12 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 	}
 	csmr.chIn = make(chan *nats.Msg, common.RCV_BUF_SIZE)
 	csmr.chOut = make(chan model.Messager, common.RCV_BUF_SIZE)
-	sub, err := csmr.brk.conn.QueueSubscribeSyncWithChan(csmr.topic, csmr.group, csmr.chIn)
+	sub, err := csmr.brk.conn.QueueSubscribeSyncWithChan(csmr.Sub(), csmr.Group(), csmr.chIn)
 	if err != nil {
-		log.Errorf("[NATS] consumer(%v) failed to subscribe topic %v, group %v: %v.", csmr.id, csmr.topic, csmr.group, err)
+		log.Errorf("[NATS] consumer(%v) failed to subscribe %v, group %v: %v.", csmr.ID(), csmr.Sub(), csmr.Group(), err)
 		return nil, err
 	}
-	log.Infof("[NATS] consumer(%v) subscribed to topic %v, group %v.", csmr.id, csmr.topic, csmr.group)
+	log.Infof("[NATS] consumer(%v) subscribed to topic %v, group %v.", csmr.ID(), csmr.Sub(), csmr.Group())
 	go func(csmr *consumer) {
 		csmr.chClose = make(chan int)
 
@@ -94,19 +76,10 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 
 func (csmr *consumer) Close() error {
 	if !csmr.subscribed {
-		log.Warnf("[NATS] close a closed consumer(%v) %v:%v.", csmr.id, csmr.topic, csmr.group)
+		log.Warnf("[NATS] close a closed consumer(%v) %v:%v.", csmr.ID(), csmr.Sub(), csmr.Group())
 		return nil
 	}
 	close(csmr.chClose)
-	csmr.wg.Wait()
-	log.Infof("[NATS] consumer(%v) %v:%v closed.", csmr.id, csmr.topic, csmr.group)
+	log.Infof("[NATS] consumer(%v) %v:%v closed.", csmr.ID(), csmr.Sub(), csmr.Group())
 	return nil
-}
-
-func (csmr *consumer) Topic() string {
-	return csmr.topic
-}
-
-func (csmr *consumer) Group() string {
-	return csmr.group
 }
