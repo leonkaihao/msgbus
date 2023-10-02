@@ -1,12 +1,58 @@
 package inproc
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
 )
+
+type Integer struct {
+	a int
+}
+
+func matchSubMapper(t *testing.T, sm *subMapper[Integer], topic string, expect int) {
+	nr := sm.Check(strings.Split(topic, "."))
+	if len(nr) != expect {
+		t.Errorf("topic %v expects %v matches but got %v", topic, expect, len(nr))
+	}
+}
+
+func TestSubMapper(t *testing.T) {
+	sm := newSubMapper[Integer]()
+	sm.Add([]string{">"}, &Integer{0})
+	sm.Add([]string{"reading", ">"}, &Integer{1})
+	sm.Add([]string{"event"}, &Integer{2})
+	sm.Add([]string{"event", "*"}, &Integer{3})
+	sm.Add([]string{"event", ">"}, &Integer{4})
+	sm.Add([]string{"event", "zone"}, &Integer{5})
+	sm.Add([]string{"event", "zone", "*"}, &Integer{6})
+	sm.Add([]string{"*", "zone", "*"}, &Integer{7})
+	sm.Add([]string{"event", "zone", ">"}, &Integer{8})
+	sm.Add([]string{"event", "*", "entry"}, &Integer{9})
+	sm.Add([]string{"event", "*", "*"}, &Integer{10})
+	sm.Add([]string{"event", "*", ">"}, &Integer{11})
+	sm.Add([]string{"event", "zone", "entry"}, &Integer{12})
+	sm.Add([]string{"*", "*", "leave"}, &Integer{13})
+	sm.Add([]string{"event", "*", "entry", "*"}, &Integer{14})
+	sm.Add([]string{"event", "*", "entry", ">"}, &Integer{15})
+	sm.Add([]string{"event", "zone", "entry", ">"}, &Integer{16})
+	sm.Add([]string{"event", "zone", "entry", "cancel"}, &Integer{17})
+	sm.Add([]string{"event", "zone", "entry", "cancel", "*"}, &Integer{18})
+	sm.Add([]string{"event", "zone", "entry", "cancel", ">"}, &Integer{19})
+	matchSubMapper(t, sm, "event", 2)                   // 0,2
+	matchSubMapper(t, sm, "event.zone", 4)              // 0,3,4,5
+	matchSubMapper(t, sm, "event.zone.entry", 9)        // 0,4,6,7,8,9,10,11,12
+	matchSubMapper(t, sm, "event.zone.leave", 8)        // 0,4,6,7,8,10,11,13
+	matchSubMapper(t, sm, "event.zone.entry.cancel", 8) // 0,4,8,11,14,15,16,17
+	sm.Remove([]string{"event", "zone", "entry", "cancel", ">"})
+	sm.Remove([]string{"event", "zone", "entry", "cancel"})
+	sm.Remove([]string{">"})
+	matchSubMapper(t, sm, "event.zone.entry.cancel", 6) // 4,8,11,14,15,16
+}
 
 type Consumers []model.Consumer
 
@@ -43,6 +89,7 @@ func TestTopicMapperDifferentSubGroup(t *testing.T) {
 	tm.Subscribe(cm2, make(chan<- model.Messager))
 	matchConsumer(t, tm, "sub1", []model.Consumer{cm1})
 	matchConsumer(t, tm, "sub2", []model.Consumer{cm2})
+	matchConsumer(t, tm, "sub3", []model.Consumer{})
 }
 
 func TestTopicMapperSameSubGroup(t *testing.T) {
@@ -140,4 +187,48 @@ func TestTopicMapperMixedSubInGroup(t *testing.T) {
 	matchConsumer(t, tm, "sub1", []model.Consumer{cm12, cm13, cm14})
 	matchConsumer(t, tm, "sub2", []model.Consumer{cm21, cm23, cm24})
 	matchConsumer(t, tm, "sub3", []model.Consumer{cm31, cm34})
+}
+
+func BenchmarkMatchGroup10(b *testing.B) {
+	tm := NewTopicMapper()
+	for i := 0; i < 10; i++ {
+		cm := common.NewConsumerBase(fmt.Sprintf("cm%3v", i), "sub1", fmt.Sprintf("group%3v", i))
+		tm.Subscribe(cm, make(chan<- model.Messager))
+	}
+	for i := 0; i < 1000000; i++ {
+		tm.matchConsumers("sub1")
+	}
+}
+
+func BenchmarkMatchGroup100(b *testing.B) {
+	tm := NewTopicMapper()
+	for i := 0; i < 100; i++ {
+		cm := common.NewConsumerBase(fmt.Sprintf("cm%3v", i), "sub1", fmt.Sprintf("group%3v", i))
+		tm.Subscribe(cm, make(chan<- model.Messager))
+	}
+	for i := 0; i < 1000000; i++ {
+		tm.matchConsumers("sub1")
+	}
+}
+
+func BenchmarkMatchGroup1000(b *testing.B) {
+	tm := NewTopicMapper()
+	for i := 0; i < 1000; i++ {
+		cm := common.NewConsumerBase(fmt.Sprintf("cm%3v", i), "sub1", fmt.Sprintf("group%3v", i))
+		tm.Subscribe(cm, make(chan<- model.Messager))
+	}
+	for i := 0; i < 1000000; i++ {
+		tm.matchConsumers("sub1")
+	}
+}
+
+func BenchmarkMatchTopic1000(b *testing.B) {
+	tm := NewTopicMapper()
+	for i := 0; i < 100; i++ {
+		cm := common.NewConsumerBase(fmt.Sprintf("cm%3v", i), fmt.Sprintf("sub%3v", i), fmt.Sprintf("group%3v", i))
+		tm.Subscribe(cm, make(chan<- model.Messager))
+	}
+	for i := 0; i < 1000000; i++ {
+		tm.matchConsumers("sub099")
+	}
 }

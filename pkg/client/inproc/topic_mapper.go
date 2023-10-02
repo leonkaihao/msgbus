@@ -18,6 +18,79 @@ type consumerGroup struct {
 	mapping map[string]*subConsumers // sub: consumers
 }
 
+type subMapper[T any] struct {
+	sub map[string]*subMapper[T]
+	val *T
+}
+
+func newSubMapper[T any]() *subMapper[T] {
+	return &subMapper[T]{
+		sub: make(map[string]*subMapper[T]),
+	}
+}
+
+func (sm *subMapper[T]) Add(tail []string, val *T) {
+	if len(tail) == 0 {
+		sm.val = val
+		return
+	}
+	if mp, ok := sm.sub[tail[0]]; ok {
+		mp.Add(tail[1:], val)
+	} else {
+		mp = newSubMapper[T]()
+		mp.Add(tail[1:], val)
+		sm.sub[tail[0]] = mp
+	}
+}
+
+func (sm *subMapper[T]) TraverseCreate(tail []string) *subMapper[T] {
+	if len(tail) == 0 {
+		return sm
+	}
+	if mp, ok := sm.sub[tail[0]]; ok {
+		return mp.TraverseCreate(tail[1:])
+	} else {
+		mp = newSubMapper[T]()
+		smNew := mp.TraverseCreate(tail[1:])
+		sm.sub[tail[0]] = mp
+		return smNew
+	}
+}
+
+func (sm *subMapper[T]) Remove(tail []string) {
+	if len(tail) == 1 {
+		delete(sm.sub, tail[0])
+		return
+	}
+	if mp, ok := sm.sub[tail[0]]; ok {
+		mp.Remove(tail[1:])
+	}
+}
+
+func (sm *subMapper[T]) Check(tail []string) []*T {
+	var (
+		result = []*T{}
+	)
+	if len(tail) == 0 {
+		if sm.val != nil {
+			result = []*T{sm.val}
+		}
+	} else {
+		if s, ok := sm.sub[tail[0]]; ok {
+			ss := s.Check(tail[1:])
+			result = append(ss, result...)
+		}
+		if s, ok := sm.sub["*"]; ok {
+			ss := s.Check(tail[1:])
+			result = append(ss, result...)
+		}
+		if s, ok := sm.sub[">"]; ok {
+			result = append(result, s.val)
+		}
+	}
+	return result
+}
+
 type TopicMapper struct {
 	sync.RWMutex
 	consumerGroups  map[string]*consumerGroup // group_name: object
