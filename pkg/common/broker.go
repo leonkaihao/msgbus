@@ -48,7 +48,7 @@ func (brk *BrokerBase) GetProducer(name string, topic string) model.Producer {
 }
 
 func (brk *BrokerBase) SetConsumer(csmr model.Consumer) {
-	consumerKey := brk.makeConsumerKey(csmr.Name(), csmr.Sub(), csmr.Group())
+	consumerKey := brk.makeConsumerKey(csmr.Name(), csmr.Topic(), csmr.Group())
 	brk.consumers[consumerKey] = csmr
 }
 
@@ -64,7 +64,7 @@ func (brk *BrokerBase) Close() error {
 	return nil
 }
 
-func (brk *BrokerBase) makeConsumerKey(name string, group string, topic string) string {
+func (brk *BrokerBase) makeConsumerKey(name string, topic string, group string) string {
 	return name + ":" + topic + ":" + group
 }
 
@@ -77,7 +77,7 @@ func (brk *BrokerBase) RemoveConsumer(csmr model.Consumer) error {
 		return nil
 	}
 	csmr.Close()
-	delete(brk.consumers, brk.makeConsumerKey(csmr.Name(), csmr.Sub(), csmr.Group()))
+	delete(brk.consumers, brk.makeConsumerKey(csmr.Name(), csmr.Topic(), csmr.Group()))
 	return nil
 }
 

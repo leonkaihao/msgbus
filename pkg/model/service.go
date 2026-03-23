@@ -11,6 +11,6 @@ type Service interface {
 
 type ServiceCallback interface {
 	OnReceive(csmr Consumer, msg Messager)
-	OnDestroy(inst interface{})
-	OnError(inst interface{}, err error)
+	OnDestroy(inst any)
+	OnError(inst any, err error)
 }

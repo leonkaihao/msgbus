@@ -19,6 +19,12 @@ test/pack:
 clean:
 	rm -rf ./bin
 	go clean -modcache
+clean-consumer:
+	docker rmi sim/nats/consumer:$(RELEASE_TAG)
+	docker rmi $(REGISTRY)/nats-consumer:$(RELEASE_TAG)
+clean-producer:
+	docker rmi sim/nats/producer:$(RELEASE_TAG)
+	docker rmi $(REGISTRY)/nats-producer:$(RELEASE_TAG)
 
 
 build-consumer:

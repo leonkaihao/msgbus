@@ -10,15 +10,15 @@ import (
 type ConsumerBase struct {
 	id    string
 	name  string
-	sub   string
+	topic string
 	group string
 }
 
-func NewConsumerBase(name string, sub string, group string) *ConsumerBase {
+func NewConsumerBase(name string, topic string, group string) *ConsumerBase {
 	csmr := &ConsumerBase{
 		id:    fmt.Sprintf("%v-%v", name, rand.Intn(1000)),
 		name:  name,
-		sub:   sub,
+		topic: topic,
 		group: group,
 	}
 	return csmr
@@ -40,8 +40,8 @@ func (csmr *ConsumerBase) Close() error {
 	return ErrNotImplemented
 }
 
-func (csmr *ConsumerBase) Sub() string {
-	return csmr.sub
+func (csmr *ConsumerBase) Topic() string {
+	return csmr.topic
 }
 
 func (csmr *ConsumerBase) Group() string {

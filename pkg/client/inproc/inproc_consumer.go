@@ -37,7 +37,7 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 	csmr.chIn = make(chan model.Messager, common.RCV_BUF_SIZE)
 	csmr.chOut = make(chan model.Messager, common.RCV_BUF_SIZE)
 	csmr.brk.Subscribe(csmr, csmr.chIn)
-	log.Infof("[inproc] consumer(%v) subscribed to topic %v, group %v.", csmr.ID(), csmr.Sub(), csmr.Group())
+	log.Infof("[inproc] consumer(%v) subscribed to topic %v, group %v.", csmr.ID(), csmr.Topic(), csmr.Group())
 	go func(csmr *consumer) {
 		csmr.chClose = make(chan int)
 
@@ -66,10 +66,10 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 
 func (csmr *consumer) Close() error {
 	if !csmr.subscribed {
-		log.Warnf("[inproc] close a closed consumer(%v) %v:%v.", csmr.ID(), csmr.Sub(), csmr.Group())
+		log.Warningf("[inproc] close a closed consumer(%v) %v:%v.", csmr.ID(), csmr.Topic(), csmr.Group())
 		return nil
 	}
 	close(csmr.chClose)
-	log.Infof("[inproc] consumer(%v) %v:%v closed.", csmr.ID(), csmr.Sub(), csmr.Group())
+	log.Infof("[inproc] consumer(%v) %v:%v closed.", csmr.ID(), csmr.Topic(), csmr.Group())
 	return nil
 }

@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 const (
@@ -177,14 +178,17 @@ func (pl *rawPayload) UnPack(buf []byte) ([]byte, map[string]string, error) {
 }
 
 func FindPayloadFromData(buf []byte) (Payload, error) {
-	switch {
-	case buf[0] == 0xA1 && buf[1] == 0x60:
-		return NewEdgebusPayload(), nil
-	case buf[0] == '{':
-		return NewMsgbusPayload(), nil
-	default:
-		return NewRawPayload(), nil
+	if len(buf) == 0 {
+		return nil, fmt.Errorf("empty message data detected")
 	}
+	if buf[0] == 0xA1 && buf[1] == 0x60 {
+		return NewEdgebusPayload(), nil
+	}
+	if strings.Contains(string(buf), "metadata") {
+		return NewMsgbusPayload(), nil
+
+	}
+	return NewRawPayload(), nil
 }
 
 func FindPayloadByType(plType string) (Payload, error) {

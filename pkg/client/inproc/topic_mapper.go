@@ -117,19 +117,19 @@ func (tm *TopicMapper) Subscribe(csmr model.Consumer, chn chan<- model.Messager)
 		}
 		tm.consumerGroups[csmr.Group()] = group
 	}
-	subm, ok := tm.subMapping[csmr.Sub()]
+	subm, ok := tm.subMapping[csmr.Topic()]
 	if !ok {
 		subm = map[string]int{csmr.Group(): 1}
-		tm.subMapping[csmr.Sub()] = subm
+		tm.subMapping[csmr.Topic()] = subm
 	} else {
 		subm[csmr.Group()]++
 	}
-	subcsmrs, ok := group.mapping[csmr.Sub()]
+	subcsmrs, ok := group.mapping[csmr.Topic()]
 	if !ok {
 		subcsmrs = &subConsumers{
 			Consumers: []model.Consumer{},
 		}
-		group.mapping[csmr.Sub()] = subcsmrs
+		group.mapping[csmr.Topic()] = subcsmrs
 	}
 	subcsmrs.Consumers = append(subcsmrs.Consumers, csmr)
 	tm.consumerChanMap[csmr] = chn
@@ -140,11 +140,11 @@ func (tm *TopicMapper) UnSubscribe(csmr model.Consumer) error {
 	defer tm.Unlock()
 	group, ok := tm.consumerGroups[csmr.Group()]
 	if !ok {
-		return fmt.Errorf("failed to unsubscribe consumer (%v,%v,%v), group not registered", csmr.ID(), csmr.Sub(), csmr.Group())
+		return fmt.Errorf("failed to unsubscribe consumer (%v,%v,%v), group not registered", csmr.ID(), csmr.Topic(), csmr.Group())
 	}
-	subcsmrs, ok := group.mapping[csmr.Sub()]
+	subcsmrs, ok := group.mapping[csmr.Topic()]
 	if !ok {
-		return fmt.Errorf("failed to unsubscribe consumer (%v,%v,%v), sub topic not registered", csmr.ID(), csmr.Sub(), csmr.Group())
+		return fmt.Errorf("failed to unsubscribe consumer (%v,%v,%v), sub topic not registered", csmr.ID(), csmr.Topic(), csmr.Group())
 	}
 	for i, c := range subcsmrs.Consumers {
 		if csmr == c {
@@ -153,7 +153,7 @@ func (tm *TopicMapper) UnSubscribe(csmr model.Consumer) error {
 		}
 	}
 	if len(subcsmrs.Consumers) == 0 {
-		delete(group.mapping, csmr.Sub())
+		delete(group.mapping, csmr.Topic())
 	} else {
 		subcsmrs.CurIndex = subcsmrs.CurIndex % len(subcsmrs.Consumers)
 	}
@@ -161,7 +161,7 @@ func (tm *TopicMapper) UnSubscribe(csmr model.Consumer) error {
 		delete(tm.consumerGroups, csmr.Group())
 	}
 
-	groups, ok := tm.subMapping[csmr.Sub()]
+	groups, ok := tm.subMapping[csmr.Topic()]
 	if ok {
 		if count, ok := groups[csmr.Group()]; ok {
 			count--

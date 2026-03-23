@@ -13,7 +13,8 @@ import (
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/config"
 	"github.com/leonkaihao/msgbus/pkg/model"
-)
+	"github.com/leonkaihao/msgbus/pkg/utils"
+	)
 
 type serviceCb struct {
 	countMap map[string]int64 // (producerid: count)
@@ -86,6 +87,8 @@ func main() {
 		log.Errorf("Error: %v", err)
 		return
 	}
+
+	utils.SetLogLevel(cfg.LogLevel)
 
 	cli, err := client.NewBuilder(client.CLI_NATS).Build()
 	if err != nil {

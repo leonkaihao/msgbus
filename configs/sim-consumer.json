@@ -1,9 +1,15 @@
 {
     "device_id": "dev$9527",
+    "logLevel": "INFO",
     "consumers": [{
-        "endpoint": "nats://nats:4222",
+        "endpoint": "$NATS_PORT",
         "topics":[
-            {"topic": ">", "group": "group1"}
+            {"topic": "reading.>", "group": "group1"},
+            {"topic": "event.>", "group": "group1"},
+            {"topic": "alarm.>", "group": "group1"},
+            {"topic": "notification.>", "group": "group1"},
+            {"topic": "command.>", "group": "group1"},
+            {"topic": "monitoring.>", "group": "group1"}
         ],
         "show": "all"
     }]

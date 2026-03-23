@@ -1,9 +1,9 @@
-package inproc
+package mqtt
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
-	log "github.com/sirupsen/logrus"
 )
 
 type client struct {
@@ -11,7 +11,7 @@ type client struct {
 }
 
 func NewClient() model.Client {
-	log.Infoln("[INPROC bus] client created.")
+	log.Info("[MQTT] client created.")
 	cli := &client{
 		common.NewClientBase(),
 	}

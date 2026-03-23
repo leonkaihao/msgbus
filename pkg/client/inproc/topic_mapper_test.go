@@ -64,18 +64,15 @@ func matchConsumer(t *testing.T, tm *TopicMapper, topic string, expect []model.C
 	cmrs, err := tm.matchConsumers(topic)
 	if err != nil {
 		t.Fatal(err)
-		return
 	}
 	if len(cmrs) != len(expect) {
 		t.Fatalf("match topic %v, expect %v match , but got %v match", topic, len(expect), len(cmrs))
-		return
 	}
 	sort.Sort(Consumers(cmrs))
 	sort.Sort(Consumers(expect))
 	for i := 0; i < len(cmrs); i++ {
 		if cmrs[i] != expect[i] {
-			t.Fatalf("expect match (%v, %v, %v), but got (%v, %v, %v)", expect[i].ID(), expect[i].Sub(), expect[i].Group(), cmrs[i].ID(), cmrs[i].Sub(), cmrs[i].Group())
-			return
+			t.Fatalf("expect match (%v, %v, %v), but got (%v, %v, %v)", expect[i].ID(), expect[i].Topic(), expect[i].Group(), cmrs[i].ID(), cmrs[i].Topic(), cmrs[i].Group())
 		}
 	}
 }

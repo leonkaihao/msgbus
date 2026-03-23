@@ -50,12 +50,13 @@ func (svc *service) AddConsumers(cms []model.Consumer) {
 				select {
 				case msgr, ok := <-chMsg:
 					if !ok {
-						svc.cb.OnError(cm, fmt.Errorf("failed to receive a message from channel %v:%v", cm.Sub(), cm.Group()))
+						svc.cb.OnError(cm, fmt.Errorf("failed to receive a message from channel %v:%v", cm.Topic(), cm.Group()))
 						svc.removeConsumer(cm)
 						return
 					}
-					log.Debugf("msgbus service: consumer %v received a message %v", cm.ID(), cm.Sub())
-					svc.msgChan <- msgr.WithDest(cm.ID())
+					log.Debugf("msgbus service: consumer %v received a message %v", cm.ID(), cm.Topic())
+					msgr.WithDest(cm.ID())
+					svc.msgChan <- msgr
 				case <-svc.exitChan:
 					svc.removeConsumer(cm)
 					return
@@ -83,7 +84,7 @@ func (svc *service) Serve() error {
 			if !ok {
 				return fmt.Errorf("msg channel is closed")
 			}
-			msgr.Ack([]byte(model.CONSUMER_ACK))
+			msgr.Ack([]byte(msgr.Dest()))
 			if svc.cb != nil {
 				svc.cb.OnReceive(svc.cms[msgr.Dest()], msgr)
 			}

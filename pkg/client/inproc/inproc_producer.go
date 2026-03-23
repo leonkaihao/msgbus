@@ -2,6 +2,7 @@ package inproc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
@@ -41,6 +42,25 @@ func (prd *producer) Fire(data []byte, metadata map[string]string) error {
 }
 
 func (prd *producer) Request(ctx context.Context, data []byte, metadata map[string]string) ([]byte, error) {
-	err := prd.Fire(data, metadata)
-	return []byte("ACK"), err
+
+	log.Debugf("producer %v request topic %v, metadata %v, data %v", prd.ID(), prd.Topic(), metadata, string(data))
+	msg, err := NewMessager(prd.CurrentSeq(), prd.Topic(), prd.PackData(data, metadata))
+	if err != nil {
+		return nil, err
+	}
+	err = prd.brk.Dispatch(msg)
+	if err != nil {
+		return nil, err
+	}
+	prd.SeqInc()
+	msgr := msg.(*messager)
+	select {
+	case resp, ok := <-msgr.respChan:
+		if !ok {
+			return nil, fmt.Errorf("producer %v request topic %v failed, channel has been closed", prd.ID(), prd.Topic())
+		}
+		return resp, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }

@@ -37,6 +37,7 @@ type Consumer struct {
 
 type Config struct {
 	DeviceId  string      `json:"device_id"`
+	LogLevel string       `json:"logLevel"`
 	Producer  *Producer   `json:"producer"`
 	Consumers []*Consumer `json:"consumers"`
 }

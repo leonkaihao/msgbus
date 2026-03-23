@@ -1,6 +1,9 @@
 package nats
 
 import (
+
+	// "context"
+
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
 
@@ -18,16 +21,16 @@ type consumer struct {
 	subscribed bool
 }
 
-func NewConsumer(name string, brk *broker, sub string, group string) model.Consumer {
+func NewConsumer(name string, brk *broker, topic string, group string) model.Consumer {
 	if brk == nil {
 		log.Fatalln("[NATS] broker cannot be Nil.")
 	}
-	cBase := common.NewConsumerBase(name, sub, group)
+	cBase := common.NewConsumerBase(name, topic, group)
 	csmr := &consumer{
 		ConsumerBase: cBase,
 		brk:          brk,
 	}
-	log.Infof("[NATS] consumer(%v) topic group (%v:%v) created.", csmr.ID(), sub, group)
+	log.Infof("[NATS] consumer(%v) topic group (%v:%v) created.", csmr.ID(), topic, group)
 	return csmr
 }
 
@@ -37,12 +40,12 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 	}
 	csmr.chIn = make(chan *nats.Msg, common.RCV_BUF_SIZE)
 	csmr.chOut = make(chan model.Messager, common.RCV_BUF_SIZE)
-	sub, err := csmr.brk.conn.QueueSubscribeSyncWithChan(csmr.Sub(), csmr.Group(), csmr.chIn)
+	sub, err := csmr.brk.conn.QueueSubscribeSyncWithChan(csmr.Topic(), csmr.Group(), csmr.chIn)
 	if err != nil {
-		log.Errorf("[NATS] consumer(%v) failed to subscribe %v, group %v: %v.", csmr.ID(), csmr.Sub(), csmr.Group(), err)
+		log.Errorf("[NATS] consumer(%v) failed to subscribe %v, group %v: %v.", csmr.ID(), csmr.Topic(), csmr.Group(), err)
 		return nil, err
 	}
-	log.Infof("[NATS] consumer(%v) subscribed to topic %v, group %v.", csmr.ID(), csmr.Sub(), csmr.Group())
+	log.Infof("[NATS] consumer(%v) subscribed to topic %v, group %v.", csmr.ID(), csmr.Topic(), csmr.Group())
 	go func(csmr *consumer) {
 		csmr.chClose = make(chan int)
 
@@ -76,10 +79,10 @@ func (csmr *consumer) Subscribe() (<-chan model.Messager, error) {
 
 func (csmr *consumer) Close() error {
 	if !csmr.subscribed {
-		log.Warnf("[NATS] close a closed consumer(%v) %v:%v.", csmr.ID(), csmr.Sub(), csmr.Group())
+		log.Warningf("[NATS] close a closed consumer(%v) %v:%v.", csmr.ID(), csmr.Topic(), csmr.Group())
 		return nil
 	}
 	close(csmr.chClose)
-	log.Infof("[NATS] consumer(%v) %v:%v closed.", csmr.ID(), csmr.Sub(), csmr.Group())
+	log.Infof("[NATS] consumer(%v) %v:%v closed.", csmr.ID(), csmr.Topic(), csmr.Group())
 	return nil
 }

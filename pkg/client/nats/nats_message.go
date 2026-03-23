@@ -24,5 +24,6 @@ func NewMessager(id int64, msg *nats.Msg) (model.Messager, error) {
 }
 
 func (msgr *messager) Ack(data []byte) error {
+	msgr.msg.Ack()
 	return msgr.msg.Respond(data)
 }

@@ -3,7 +3,6 @@ package inproc
 import (
 	"github.com/leonkaihao/msgbus/pkg/common"
 	"github.com/leonkaihao/msgbus/pkg/model"
-
 	log "github.com/sirupsen/logrus"
 )
 
