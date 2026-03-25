@@ -1,7 +1,7 @@
 {
   "name": "msgbus",
   "registry": "leonkaihao",
-  "version": "1.1.0",
-  "release_tag": "latest",
-  "build": 1
+  "version": "1.1.2",
+  "release_tag": "v1.1.2",
+  "build": 3
 }

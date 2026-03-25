@@ -25,7 +25,12 @@ clean-consumer:
 clean-producer:
 	docker rmi sim/nats/producer:$(RELEASE_TAG)
 	docker rmi $(REGISTRY)/nats-producer:$(RELEASE_TAG)
-
+release:
+	git tag -a $(RELEASE_TAG) -m "Release $(RELEASE_TAG)"
+	git push origin $(RELEASE_TAG)
+rm-release:
+	git tag -d $(RELEASE_TAG)
+	git push origin --delete $(RELEASE_TAG)
 
 build-consumer:
 	docker build -t sim/nats/consumer:$(RELEASE_TAG) -f ./build/docker/Dockerfile_consumer .

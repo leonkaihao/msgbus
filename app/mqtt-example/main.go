@@ -7,14 +7,14 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/leonkaihao/msgbus/pkg/client"
 	"github.com/leonkaihao/msgbus/pkg/model"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 
-	cli, err := client.NewBuilder(client.CLI_MQTT).Build()
+	cli, err := client.NewBuilder(client.CLI_MQTT3).Build()
 	if err != nil {
 		log.Error(err.Error())
 		return

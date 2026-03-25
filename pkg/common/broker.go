@@ -27,7 +27,7 @@ func (brk *BrokerBase) URL() string {
 	return brk.url
 }
 
-func (brk *BrokerBase) Consumer(name string, sub string, group string) model.Consumer {
+func (brk *BrokerBase) Consumer(name string, topic string, group string) model.Consumer {
 	// need to be implemented by successor
 	return nil
 }
@@ -37,8 +37,8 @@ func (brk *BrokerBase) Producer(name string, topic string) model.Producer {
 	return nil
 }
 
-func (brk *BrokerBase) GetConsumer(name string, sub string, group string) model.Consumer {
-	consumerKey := brk.makeConsumerKey(name, sub, group)
+func (brk *BrokerBase) GetConsumer(name string, topic string, group string) model.Consumer {
+	consumerKey := brk.makeConsumerKey(name, topic, group)
 	return brk.consumers[consumerKey]
 }
 

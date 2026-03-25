@@ -19,12 +19,12 @@ func NewBroker(cli model.Client, url string) model.Broker {
 	return brk
 }
 
-func (brk *broker) Consumer(name string, sub string, group string) model.Consumer {
-	csmr := brk.BrokerBase.GetConsumer(name, sub, group)
+func (brk *broker) Consumer(name string, topic string, group string) model.Consumer {
+	csmr := brk.BrokerBase.GetConsumer(name, topic, group)
 	if csmr != nil {
 		return csmr
 	}
-	csmr = NewConsumer(name, brk, sub, group)
+	csmr = NewConsumer(name, brk, topic, group)
 	brk.BrokerBase.SetConsumer(csmr)
 	return csmr
 }

@@ -17,16 +17,16 @@ type consumer struct {
 	subscribed bool
 }
 
-func NewConsumer(name string, brk *broker, sub string, group string) model.Consumer {
+func NewConsumer(name string, brk *broker, topic string, group string) model.Consumer {
 	if brk == nil {
 		log.Fatalln("[inproc] broker cannot be Nil.")
 	}
-	cBase := common.NewConsumerBase(name, sub, group)
+	cBase := common.NewConsumerBase(name, topic, group)
 	csmr := &consumer{
 		ConsumerBase: cBase,
 		brk:          brk,
 	}
-	log.Infof("[inproc] consumer(%v) topic group (%v:%v) created.", csmr.ID(), sub, group)
+	log.Infof("[inproc] consumer(%v) topic group (%v:%v) created.", csmr.ID(), topic, group)
 	return csmr
 }
 

@@ -1,6 +1,6 @@
 module github.com/leonkaihao/msgbus
 
-go 1.18
+go 1.20
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.3
