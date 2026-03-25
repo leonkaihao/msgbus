@@ -1,4 +1,12 @@
-How to configure your dev env
+# msgbus
+
+[![CI](https://github.com/leonkaihao/msgbus/actions/workflows/ci.yml/badge.svg)](https://github.com/leonkaihao/msgbus/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/leonkaihao/msgbus)](https://github.com/leonkaihao/msgbus)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A message bus implementation supporting NATS and MQTT protocols for Go applications.
+
+## How to configure your dev env
 # Prepare
 1. Assume you have Docker installed.
 2. Install VScode extensions: `Kubernetes`, `Kubernetes Kind`.
